@@ -11,6 +11,26 @@ public class MyRect
     private int w, h;   //幅と高さ
     private MyColor myc;    //RGB値
 
+    public int X
+    {
+        get { return x; }
+    }
+
+    public int Y
+    {
+        get { return y; }
+    }
+
+    public int W
+    {
+        get { return w; }
+    }
+
+    public int H
+    {
+        get { return h; }
+    }
+
     public MyRect(int _x, int _y, int _w, int _h)
     {
         x = _x;
@@ -27,9 +47,10 @@ public class MyRect
         myc.R = _myc.R;
     }
 
+    //たぶんこれが間違っている！
     public bool isIn(int ex , int why)
     {
-        if ((ex >= x && ex < x + w) && (why >= y && why < y + h))
+        if ((ex >= x && ex <= x + w) && (why >= y && why <= y + h))
         {
             return true;
         }
@@ -67,6 +88,8 @@ public class MyRect
         }
     }
 
+    //間違っている可能性が高いのここまで
+
     public void drawMe(Mat material)
     {
         Imgproc.rectangle(material,
@@ -91,14 +114,7 @@ public class MyColor
         }
         set
         {
-            if(value <= 255)
-            {
-                b = value;
-            }
-            else
-            {
-                b = 255;
-            }
+             b = value;
         }
     }
 
@@ -110,14 +126,7 @@ public class MyColor
         }
         set
         {
-            if(value <= 255)
-            {
-                g = value;
-            }
-            else
-            {
-                g = 255;
-            }
+            g = value;
         }
     }
 
@@ -129,39 +138,17 @@ public class MyColor
         }
         set
         {
-            if(value <= 255)
-            {
-                r = value;
-            }
-            else
-            {
-                r = 255;
-            }
+            r = value;
         }
     }
 
     public MyColor(byte arl, byte jee, byte vee)
     {
-        if (vee <= 255 && vee >= 0)
-            b = vee;
-        else if (vee > 255)
-            b = 255;
-        else
-            b = 0;
+        b = vee;
 
-        if (jee <= 255 && jee >= 0)
-            g = jee;
-        else if (jee > 255)
-            g = 255;
-        else
-            g = 0;
+        g = jee;
 
-        if (arl <= 255 && arl >= 0)
-            r = arl;
-        else if (arl > 255)
-            r = 255;
-        else
-            r = 0;
+        r = arl;
     }
 
     public bool compare(MyColor myc)

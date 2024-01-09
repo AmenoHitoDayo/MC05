@@ -203,7 +203,9 @@ MonoBehaviour:
   output: {fileID: 2029647763}
   fps: 1
   pixSize: 20
-  isMondOut: 1
+  isMondOut: 0
+  singleMode: 0
+  singleRectNum: 0
 --- !u!1 &311183016
 GameObject:
   m_ObjectHideFlags: 0
@@ -792,7 +794,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Texture: {fileID: 2800000, guid: d9584a41bd32df14c8be7410785eedb8, type: 3}
+  m_Texture: {fileID: 2800000, guid: c0b58f2b50abb5143897254199a6e9d0, type: 3}
   m_UVRect:
     serializedVersion: 2
     x: 0

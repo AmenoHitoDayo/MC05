@@ -26,6 +26,11 @@ public class convartScript01 : MonoBehaviour
     [SerializeField]
     private bool isMondOut = true;
 
+    [SerializeField]
+    private bool singleMode = false;
+    [SerializeField]
+    private int singleRectNum = 0;
+
     List<MyRect> myRects;
 
     //色の定義
@@ -39,6 +44,7 @@ public class convartScript01 : MonoBehaviour
     void Start()
     {
         //pixSize = Gcd(width, height);
+        Debug.Log(Gcd(1280, 720));
 
         myRects = new List<MyRect>();
     }
@@ -52,9 +58,10 @@ public class convartScript01 : MonoBehaviour
             //Debug.Log(Time.frameCount);
 
             srcTexture = (Texture2D)input.texture as Texture2D;
+            //pixSize = Gcd(srcTexture.width, srcTexture.height);
 
             Mat srcMat = new Mat(this.srcTexture.height, this.srcTexture.width, CvType.CV_8UC3);
-            Mat dstMat = new Mat(this.srcTexture.height, this.srcTexture.width, CvType.CV_8UC3, new Scalar(255, 255, 255));
+            Mat dstMat = new Mat(this.srcTexture.height, this.srcTexture.width, CvType.CV_8UC3, new Scalar(0, 255, 255));
 
             if(this.dstTexture == null)
             {
@@ -67,11 +74,16 @@ public class convartScript01 : MonoBehaviour
             
             makeMozike2(srcMat);
             pentatomization(srcMat);
-            //makeMonds(srcMat, dstMat);
+            if (isMondOut)
+            {
+                makeMonds(srcMat, dstMat);
+                Utils.matToTexture2D(dstMat, dstTexture);
+            }
+            else
+            {
+                Utils.matToTexture2D(srcMat, dstTexture);
+            }
 
-            //Utils.matToTexture2D(dstMat, dstTexture);
-            
-            Utils.matToTexture2D(srcMat, dstTexture);
 
             output.texture = dstTexture;
 
@@ -96,30 +108,47 @@ public class convartScript01 : MonoBehaviour
         byte[] data = new byte[srcMat.width() * srcMat.height() * channel];
         MatUtils.copyFromMat(srcMat, data);
 
-        for (int i = 0; i < width2; i += pixSize)
+        for (int y = 0; y < height2; y += pixSize)
         {
-            for (int j = 0; j < height2; j += pixSize)
+            for (int x = 0; x < width2; x += pixSize)
             {
-                makeRect(data, width2, height2, channel,  i, j);
+                makeRect(data, width2, height2, channel, x, y);
             }
         }
 
-
-        foreach (MyRect r in myRects)
+        if (singleMode)
         {
-            r.drawMe(dstMat);
+            if (singleRectNum < myRects.Count)
+                myRects[singleRectNum].drawMe(dstMat);
         }
+        else
+        {
+
+            
+            foreach (MyRect r in myRects)
+            {
+                Debug.Log("pos(" + r.X + "," + r.Y + "), size(" + r.W + "," + r.H + ")");
+                r.drawMe(dstMat);
+            }
+            
+        }
+        
     }
 
     void makeRect(byte[] data, int matWid, int matHei, int channel, int x, int y)
     {
+        //作れる最大サイズの矩形の縦横幅を設定
         int mxWid = matWid - x;
         int mxHei = matHei - y;
 
         int wid = 0, hei = 0;
 
         foreach (MyRect r in myRects){
-            if (r.isIn(x, y)) return;
+            //矩形の右下座標が自分よりも左上にあるなら、その矩形との判定は飛ばしていい
+            if (r.X + r.W < x && r.Y + r.H < y) return;
+
+            //すでに矩形の中にあるならreturn
+            if (r.isIn(x + 1, y + 1)) return;
 
             int ex = r.xDist(x, y);
             int why = r.yDist(x, y);
@@ -127,6 +156,7 @@ public class convartScript01 : MonoBehaviour
             if(why > 0 && why < mxHei) { mxHei = why; }
         }
 
+        //mat配列内で何番目に(x,y)の画素があるか
         int idxx = (x + y * matWid);
         MyColor myC = new MyColor(data[idxx + 0], data[idxx + 1], data[idxx + 2]);
 
@@ -137,7 +167,7 @@ public class convartScript01 : MonoBehaviour
             pointColor = new MyColor(data[idx + 0], data[idx + 1], data[idx + 2]);
             if (!myC.compare(pointColor))
             {
-                Debug.Log("different color ditected!");
+                Debug.Log("different color ditected!:x");
                 break;
             }
             wid += pixSize;
@@ -150,7 +180,7 @@ public class convartScript01 : MonoBehaviour
             pointColor = new MyColor(data[idx + 0], data[idx + 1], data[idx + 2]);
             if (!myC.compare(pointColor))
             {
-                Debug.Log("different color ditected!");
+                Debug.Log("different color ditected!:y");
                 break;
             }
             hei += pixSize;
@@ -189,9 +219,13 @@ public class convartScript01 : MonoBehaviour
                     mkg = data[basIDX + 1],
                     mkb = data[basIDX + 2];
 
-                for(int xx = 0; xx < pixSize; xx++)
+                //これないとoutofboundする（割り切れなかず入れると配列外に出ちゃう）
+                int xRim = Mathf.Min(pixSize, wid - x);
+                int yRim = Mathf.Min(pixSize, hei - y);
+
+                for(int xx = 0; xx < xRim; xx++)
                 {
-                    for(int yy = 0; yy < pixSize; yy++)
+                    for(int yy = 0; yy < yRim; yy++)
                     {
                         int idx = (x + xx + (y + yy) * wid) * cha;
                         if (idx > cha * wid * hei) break;
@@ -279,44 +313,6 @@ public class convartScript01 : MonoBehaviour
         }
 
         MatUtils.copyToMat(data, material);
-    }
-
-    void makeMozike(Mat material)
-    {
-
-        for (int x = 0; x < material.rows(); x += pixSize)
-        {
-            for (int y = 0; y < material.cols(); y += pixSize)
-            {
-                double[] data = material.get(x, y);
-                double[] result = white;
-
-                if(data[1] > 50)
-                {
-                    if (data[0] < 15 || data[0] > 200)
-                        result = red;
-                    else if (data[0] >= 15 && data[0] <= 90)
-                        result = yellow;
-                    else
-                        result = blue;
-                }
-                else
-                {
-                    if (data[2] > 127)
-                        result = white;
-                    else
-                        result = black;
-                }
-
-                for (int xx = 0; xx < pixSize; xx++)
-                {
-                    for (int yy = 0; yy < pixSize; yy++)
-                    {
-                        material.put(x + xx, y + yy, result);
-                    }
-                }
-            }
-        }
     }
 
 
