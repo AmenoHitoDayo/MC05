@@ -144,7 +144,7 @@ public class convartScript01 : MonoBehaviour
         int wid = 0, hei = 0;
 
         foreach (MyRect r in myRects){
-            //矩形の右下座標が自分よりも左上にあるなら、その矩形との判定は飛ばしていい
+            //矩形の右下座標が自分よりも左上にあるなら、その矩形との判定はTE飛ばしていい
             if (r.X + r.W < x && r.Y + r.H < y) return;
 
             //すでに矩形の中にあるならreturn
