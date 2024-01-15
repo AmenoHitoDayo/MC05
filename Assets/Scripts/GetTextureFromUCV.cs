@@ -8,7 +8,7 @@ public class GetTextureFromUCV : MonoBehaviour
     [SerializeField]
     private UVCManager uvc;
     UVCManager.CameraInfo cameraInfo;
-    private Texture2D tex2d;
+    private Texture tex2d;
 
     [SerializeField]
     private Renderer render;
@@ -18,7 +18,7 @@ public class GetTextureFromUCV : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+
     }
 
     // Update is called once per frame
@@ -27,13 +27,17 @@ public class GetTextureFromUCV : MonoBehaviour
         if(uvc.GetAttachedDevices().Count > 0)
         {
             cameraInfo = uvc.GetAttachedDevices()[0];
-            tex2d = cameraInfo.previewTexture as Texture2D;
+            tex2d = cameraInfo.previewTexture;
+
             render.material.mainTexture = tex2d;
         }
         else
         {
-            if(render.material.mainTexture != defaultTex)
+            if (render.material.mainTexture != defaultTex)
+            {
                 render.material.mainTexture = defaultTex;
+                Debug.Log("no camera found");
+            }
             return;
         }
 

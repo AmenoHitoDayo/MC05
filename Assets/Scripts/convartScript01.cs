@@ -17,7 +17,7 @@ public class convartScript01 : MonoBehaviour
     [SerializeField]
     int fps = 60;
 
-    [SerializeField, Header("ピクセルサイズ:割り切れる数じゃないとエラー吐くっぽい？")]
+    [SerializeField, Header("ピクセルサイズ:実行中に書き換えるな！")]
     int pixSize = 20;
 
     Texture2D srcTexture;
@@ -44,7 +44,6 @@ public class convartScript01 : MonoBehaviour
     void Start()
     {
         //pixSize = Gcd(width, height);
-        Debug.Log(Gcd(1280, 720));
 
         myRects = new List<MyRect>();
     }
@@ -58,7 +57,6 @@ public class convartScript01 : MonoBehaviour
             //Debug.Log(Time.frameCount);
 
             srcTexture = (Texture2D)input.texture as Texture2D;
-            //pixSize = Gcd(srcTexture.width, srcTexture.height);
 
             Mat srcMat = new Mat(this.srcTexture.height, this.srcTexture.width, CvType.CV_8UC3);
             Mat dstMat = new Mat(this.srcTexture.height, this.srcTexture.width, CvType.CV_8UC3, new Scalar(0, 255, 255));
