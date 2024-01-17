@@ -62,7 +62,7 @@ public class MyRect
 
     public int xDist(int ex, int why)
     {  //あるx軸とぶつかるか、距離を求める
-        if (why < y || why > y + h)
+        if (why <= y || why >= y + h)
         {
             return -1;
         }
@@ -76,7 +76,7 @@ public class MyRect
 
     public int yDist(int ex, int why)
     {  //あるy軸とぶつかるか、距離
-        if (ex < x || ex > x + w)
+        if (ex <= x || ex >= x + w)
         {
             return -1;
         }
@@ -90,16 +90,43 @@ public class MyRect
 
     //間違っている可能性が高いのここまで
 
-    public void drawMe(Mat material)
+    public void drawMe(Mat material, int lineWid)
     {
         Imgproc.rectangle(material,
             new OpenCVForUnity.CoreModule.Rect(x, y, w, h),
             new Scalar(myc.R, myc.G, myc.B),
             -1);
+
+
+        //上辺
+        Imgproc.rectangle(material,
+            new OpenCVForUnity.CoreModule.Rect(x, y - lineWid, w + lineWid, lineWid),
+            new Scalar(0, 0, 0),
+            -1);
+        //右辺
+        Imgproc.rectangle(material,
+            new OpenCVForUnity.CoreModule.Rect(x + w, y, lineWid, h + lineWid),
+            new Scalar(0, 0, 0),
+            -1);
+
+        //下辺
+        Imgproc.rectangle(material,
+            new OpenCVForUnity.CoreModule.Rect(x - lineWid, y + h, w + lineWid, lineWid),
+            new Scalar(0, 0, 0),
+            -1);
+
+        //左辺
+        Imgproc.rectangle(material,
+            new OpenCVForUnity.CoreModule.Rect(x - lineWid, y - lineWid, lineWid, h + lineWid),
+            new Scalar(0, 0, 0),
+            -1); ;
+
+
         Imgproc.rectangle(material,
             new OpenCVForUnity.CoreModule.Rect(x, y, w, h),
             new Scalar(0, 0, 0),
             2);
+
     }
 }
 
