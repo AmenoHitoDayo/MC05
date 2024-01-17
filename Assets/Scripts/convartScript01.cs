@@ -52,7 +52,7 @@ public class convartScript01 : MonoBehaviour
     void Update()
     {
 
-        if (Time.frameCount % Mathf.Round(60/fps) == 0)
+        if (Time.frameCount % Mathf.Round(60 / fps) == 0)
         {
             //Debug.Log(Time.frameCount);
 
@@ -61,7 +61,7 @@ public class convartScript01 : MonoBehaviour
             Mat srcMat = new Mat(this.srcTexture.height, this.srcTexture.width, CvType.CV_8UC3);
             Mat dstMat = new Mat(this.srcTexture.height, this.srcTexture.width, CvType.CV_8UC3, new Scalar(0, 255, 255));
 
-            if(this.dstTexture == null)
+            if (this.dstTexture == null)
             {
                 Debug.Log("tex created");
                 dstTexture = new Texture2D(srcMat.cols(), srcMat.rows(), TextureFormat.RGBA32, false);
@@ -69,7 +69,7 @@ public class convartScript01 : MonoBehaviour
 
             Utils.texture2DToMat(this.srcTexture, srcMat);
 
-            
+
             makeMozike2(srcMat);
             pentatomization(srcMat);
             if (isMondOut)
@@ -117,20 +117,20 @@ public class convartScript01 : MonoBehaviour
         if (singleMode)
         {
             if (singleRectNum < myRects.Count)
-                myRects[singleRectNum].drawMe(dstMat);
+                myRects[singleRectNum].drawMe(dstMat, pixSize);
         }
         else
         {
 
-            
+
             foreach (MyRect r in myRects)
             {
                 Debug.Log("pos(" + r.X + "," + r.Y + "), size(" + r.W + "," + r.H + ")");
-                r.drawMe(dstMat);
+                r.drawMe(dstMat, pixSize);
             }
-            
+
         }
-        
+
     }
 
     void makeRect(byte[] data, int matWid, int matHei, int channel, int x, int y)
@@ -141,7 +141,8 @@ public class convartScript01 : MonoBehaviour
 
         int wid = 0, hei = 0;
 
-        foreach (MyRect r in myRects){
+        foreach (MyRect r in myRects)
+        {
             //矩形の右下座標が自分よりも左上にあるなら、その矩形との判定はTE飛ばしていい
             if (r.X + r.W < x && r.Y + r.H < y) return;
 
@@ -150,15 +151,15 @@ public class convartScript01 : MonoBehaviour
 
             int ex = r.xDist(x, y);
             int why = r.yDist(x, y);
-            if(ex > 0 && ex < mxWid) { mxWid = ex; }
-            if(why > 0 && why < mxHei) { mxHei = why; }
+            if (ex > 0 && ex < mxWid) { mxWid = ex; }
+            if (why > 0 && why < mxHei) { mxHei = why; }
         }
 
         //mat配列内で何番目に(x,y)の画素があるか
         int idxx = (x + y * matWid);
         MyColor myC = new MyColor(data[idxx + 0], data[idxx + 1], data[idxx + 2]);
 
-        while(wid < mxWid)
+        while (wid < mxWid)
         {
             MyColor pointColor;
             int idx = ((x + wid) + y * matWid) * channel;
@@ -184,14 +185,14 @@ public class convartScript01 : MonoBehaviour
             hei += pixSize;
         }
 
-        
-        if(wid > 0 && hei > 0)
+
+        if (wid > 0 && hei > 0)
         {
             MyRect r = new MyRect(x, y, wid, hei);
             r.setColor(myC);
             myRects.Add(r);
         }
-        
+
     }
 
     //やった！！！！！！天才だ！！！！！！！！！
@@ -208,9 +209,9 @@ public class convartScript01 : MonoBehaviour
         MatUtils.copyFromMat(material, data);
         Debug.Log("a" + data[0].ToString());
 
-        for(int y = 0; y < hei; y += pixSize)
+        for (int y = 0; y < hei; y += pixSize)
         {
-            for(int x = 0; x < wid; x += pixSize)
+            for (int x = 0; x < wid; x += pixSize)
             {
                 int basIDX = (x + y * wid) * cha;
                 byte mkr = data[basIDX + 0],
@@ -221,9 +222,9 @@ public class convartScript01 : MonoBehaviour
                 int xRim = Mathf.Min(pixSize, wid - x);
                 int yRim = Mathf.Min(pixSize, hei - y);
 
-                for(int xx = 0; xx < xRim; xx++)
+                for (int xx = 0; xx < xRim; xx++)
                 {
-                    for(int yy = 0; yy < yRim; yy++)
+                    for (int yy = 0; yy < yRim; yy++)
                     {
                         int idx = (x + xx + (y + yy) * wid) * cha;
                         if (idx > cha * wid * hei) break;
@@ -240,9 +241,10 @@ public class convartScript01 : MonoBehaviour
 
 
     //画像の5色化
+    //OpenCVのHSVは、0→180で赤→緑→青→赤ではなく、赤→青→緑→赤（逆方向）になってるっぽい？
     void pentatomization(Mat material)
     {
-        Imgproc.cvtColor(material, material, Imgproc.COLOR_RGB2HSV_FULL);
+        Imgproc.cvtColor(material, material, Imgproc.COLOR_RGB2HSV);
 
         int wid = material.width();
         int hei = material.height();
@@ -251,9 +253,9 @@ public class convartScript01 : MonoBehaviour
         byte[] data = new byte[wid * hei * chan];
         MatUtils.copyFromMat(material, data);
 
-        for(int y = 0; y < hei; y++)
+        for (int y = 0; y < hei; y++)
         {
-            for(int x = 0; x < wid; x++)
+            for (int x = 0; x < wid; x++)
             {
                 int idx = (x + y * wid) * chan;
                 byte hue = data[idx + 0],
@@ -263,44 +265,46 @@ public class convartScript01 : MonoBehaviour
                     oG = 255,
                     oB = 255;
 
-                if(sat > 50)
+                if (sat > 50)
                 {
-                    if(hue < 15 || hue > 200)
+                    if (hue < 10 || hue > 170)
                     {
                         //red
                         oR = 255;
                         oG = 10;
                         oB = 10;
-                    }else if(hue >= 15 && hue <= 90)
-                    {
-                        //yellow
-                        oR = 255;
-                        oG = 255;
-                        oB = 10;
                     }
-                    else
+                    else if (hue >= 10 && hue <= 90)
                     {
                         //blue
                         oR = 10;
                         oG = 10;
                         oB = 255;
                     }
+                    else
+                    {
+                        //yellow
+                        oR = 255;
+                        oG = 255;
+                        oB = 10;
+                    }
+
                 }
                 else
                 {
-                    if(bri > 127)
+                    if (bri > 127)
                     {
                         //white
-                        oR = 220;
-                        oG = 220;
-                        oB = 220;
+                        oR = 255;
+                        oG = 255;
+                        oB = 255;
                     }
                     else
                     {
                         //brack
-                        oR = 40;
-                        oG = 40;
-                        oB = 40;
+                        oR = 42;
+                        oG = 42;
+                        oB = 42;
                     }
                 }
 
@@ -312,7 +316,6 @@ public class convartScript01 : MonoBehaviour
 
         MatUtils.copyToMat(data, material);
     }
-
 
     //最大公約数求めるやts
     public static int Gcd(int a, int b)
