@@ -2,6 +2,7 @@ using Serenegiant.UVC;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Timeline;
 
 public class GetTextureFromUCV : MonoBehaviour
 {
@@ -18,7 +19,7 @@ public class GetTextureFromUCV : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-
+        Application.targetFrameRate = 30;
     }
 
     // Update is called once per frame
