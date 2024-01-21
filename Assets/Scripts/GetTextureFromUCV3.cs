@@ -4,8 +4,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using static Serenegiant.UVC.UVCManager;
+using OpenCVForUnity.CoreModule;
+using OpenCVForUnity.UnityUtils;
+using OpenCVForUnity.ImgprocModule;
 
-public class GetTextureFromUCV2 : MonoBehaviour
+
+public class GetTextureFromUCV3 : MonoBehaviour
 {
     [SerializeField]
     private UVCManager uvc;
@@ -46,7 +50,9 @@ public class GetTextureFromUCV2 : MonoBehaviour
                     Debug.Log("Camera found:" + camInfos[0].DeviceName);
                     isCameraAttached = true;
                 }
-                rawImage.texture = camInfos[0].previewTexture;
+                Texture2D srcTex = camInfos[0].previewTexture as Texture2D;
+                Texture2D dstTex = ocvTest(srcTex);
+                rawImage.texture = dstTex;
             }
             else
             {
@@ -61,6 +67,18 @@ public class GetTextureFromUCV2 : MonoBehaviour
                 }
             }
         }
+    }
 
+    Texture2D ocvTest(Texture2D srcTex)
+    {
+        Mat srcMat = new Mat(srcTex.height, srcTex.width, CvType.CV_8UC3);
+        Utils.texture2DToMat(srcTex, srcMat);
+
+        Imgproc.cvtColor(srcMat, srcMat, Imgproc.COLORMAP_AUTUMN);
+
+        Texture2D dstTex = new Texture2D(srcMat.cols(), srcMat.rows(), TextureFormat.RGBA32, false);
+        Utils.matToTexture2D(srcMat, dstTex);
+
+        return dstTex;
     }
 }
