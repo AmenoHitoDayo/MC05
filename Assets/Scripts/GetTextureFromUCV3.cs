@@ -7,7 +7,7 @@ using static Serenegiant.UVC.UVCManager;
 using OpenCVForUnity.CoreModule;
 using OpenCVForUnity.UnityUtils;
 using OpenCVForUnity.ImgprocModule;
-
+using UnityEngine.Rendering;
 
 public class GetTextureFromUCV3 : MonoBehaviour
 {
@@ -16,12 +16,17 @@ public class GetTextureFromUCV3 : MonoBehaviour
     [SerializeField]
     private Texture2D errorTex;
     [SerializeField]
-    private int frameSpan;  //毎フレーム実行しないように
+    private int frameSpan = 60;  //毎フレーム実行しないように
 
     private bool isCameraAttached = true;
 
     private RawImage rawImage;
     private List<CameraInfo> camInfos;
+
+    private void Awake()
+    {
+        Application.targetFrameRate = 60;
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -50,9 +55,10 @@ public class GetTextureFromUCV3 : MonoBehaviour
                     Debug.Log("Camera found:" + camInfos[0].DeviceName);
                     isCameraAttached = true;
                 }
-                Texture2D srcTex = camInfos[0].previewTexture as Texture2D;
-                Texture2D dstTex = ocvTest(srcTex);
-                rawImage.texture = dstTex;
+                Texture2D srcTex = make2Dtex(camInfos[0].previewTexture);
+                rawImage.texture = srcTex;
+                //Texture2D dstTex = tex2DTest(srcTex);
+                //rawImage.texture = dstTex;
             }
             else
             {
@@ -69,6 +75,28 @@ public class GetTextureFromUCV3 : MonoBehaviour
         }
     }
 
+    Texture2D make2Dtex(Texture texture)
+    {
+        Texture2D texture2D = new Texture2D(texture.width, texture.height, TextureFormat.RGBA32, false);
+
+        RenderTexture currentRT = RenderTexture.active;
+
+        RenderTexture renderTexture = new RenderTexture(texture.width, texture.height, 32);
+        // mainTexture のピクセル情報を renderTexture にコピー
+        Graphics.Blit(texture, renderTexture);
+
+        // renderTexture のピクセル情報を元に texture2D のピクセル情報を作成
+        RenderTexture.active = renderTexture;
+        texture2D.ReadPixels(new UnityEngine.Rect(0, 0, renderTexture.width, renderTexture.height), 0, 0);
+        texture2D.Apply();
+
+        Color[] pixels = texture2D.GetPixels();
+
+        RenderTexture.active = currentRT;
+
+        return texture2D;
+    }
+
     Texture2D ocvTest(Texture2D srcTex)
     {
         Mat srcMat = new Mat(srcTex.height, srcTex.width, CvType.CV_8UC3);
@@ -80,5 +108,27 @@ public class GetTextureFromUCV3 : MonoBehaviour
         Utils.matToTexture2D(srcMat, dstTex);
 
         return dstTex;
+    }
+
+    Texture2D tex2DTest(Texture2D srcTex)
+    {
+        int width = srcTex.width;
+        int height = srcTex.height;
+
+        Color[] inputColors = srcTex.GetPixels();
+        Color[] outputColors = new Color[width * height];
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                var color = inputColors[(width * y) + x];
+                outputColors[(width * y) + x] = new Color(color.g, color.b, color.r);
+            }
+        }
+        Texture2D dstTexture = new Texture2D(width, height, TextureFormat.RGBA32, false);
+        dstTexture.SetPixels(outputColors);
+        dstTexture.Apply();
+
+        return dstTexture;
     }
 }
