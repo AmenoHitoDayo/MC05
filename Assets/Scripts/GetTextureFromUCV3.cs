@@ -16,7 +16,7 @@ public class GetTextureFromUCV3 : MonoBehaviour
     [SerializeField]
     private Texture2D errorTex;
     [SerializeField]
-    private int frameSpan = 60;  //毎フレーム実行しないように
+    private int frameSpan = 60;  //???t???[?????s????????????
 
     private bool isCameraAttached = true;
 
@@ -39,8 +39,8 @@ public class GetTextureFromUCV3 : MonoBehaviour
     {
         if(frameSpan <= 0)
         {
-            Debug.Log("実行フレームの数値が不正です");
-            Debug.Log("実行フレーム数値を60に設定します");
+            Debug.Log("???s?t???[???????l???s??????");
+            Debug.Log("???s?t???[?????l??60????????????");
             frameSpan = 60;
             return;
         }
@@ -56,9 +56,9 @@ public class GetTextureFromUCV3 : MonoBehaviour
                     isCameraAttached = true;
                 }
                 Texture2D srcTex = make2Dtex(camInfos[0].previewTexture);
-                rawImage.texture = srcTex;
-                //Texture2D dstTex = tex2DTest(srcTex);
-                //rawImage.texture = dstTex;
+                //rawImage.texture = srcTex;
+                Texture2D dstTex = tex2DTest(srcTex);
+                rawImage.texture = dstTex;
             }
             else
             {
@@ -82,10 +82,10 @@ public class GetTextureFromUCV3 : MonoBehaviour
         RenderTexture currentRT = RenderTexture.active;
 
         RenderTexture renderTexture = new RenderTexture(texture.width, texture.height, 32);
-        // mainTexture のピクセル情報を renderTexture にコピー
+        // mainTexture ???s?N?Z???????? renderTexture ???R?s?[
         Graphics.Blit(texture, renderTexture);
 
-        // renderTexture のピクセル情報を元に texture2D のピクセル情報を作成
+        // renderTexture ???s?N?Z???????????? texture2D ???s?N?Z????????????
         RenderTexture.active = renderTexture;
         texture2D.ReadPixels(new UnityEngine.Rect(0, 0, renderTexture.width, renderTexture.height), 0, 0);
         texture2D.Apply();
