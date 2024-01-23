@@ -15,7 +15,7 @@ public class convartScript01 : MonoBehaviour
     private RawImage output;
 
     [SerializeField]
-    int fps = 60;
+    private int frameSpan = 60;  //???t???[?????s????????????
 
     [SerializeField, Header("ピクセルサイズ:実行中に書き換えるな！")]
     int pixSize = 20;
@@ -51,10 +51,16 @@ public class convartScript01 : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
-        if (Time.frameCount % Mathf.Round(60 / fps) == 0)
+        if (frameSpan <= 0)
         {
-            //Debug.Log(Time.frameCount);
+            Debug.Log("frameSpanの値が不正です");
+            Debug.Log("60フレーム毎に実行するよう設定します");
+            frameSpan = 60;
+            return;
+        }
+
+        if (Time.frameCount % frameSpan == 0)
+        {
 
             srcTexture = (Texture2D)input.texture as Texture2D;
 
